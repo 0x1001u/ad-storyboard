@@ -1,0 +1,82 @@
+{
+  "storyboard": [
+    {
+      "scene": 1,
+      "duration_sec": 5,
+      "shot_type": "extreme_closeup",
+      "camera_angle": "high_angle",
+      "camera_movement": "fixed",
+      "scene_description": "清晨阳光透过纱帘的柔光洒在木地板上。镜头俯拍床边的云朵拖鞋，一只赤裸的脚趾缓缓滑入鞋口。切入拖鞋截面特写：记忆棉在脚踩入的瞬间下沉、包裹、回弹——脚离开后5秒完全复原。字幕叠印「5秒复原，踩不塌」。色调暖黄偏奶白，材质呈现像刚出炉的舒芙蕾。",
+      "dialogue_or_voiceover": "今天的待办清单很长——但第一步，要软着走。",
+      "mood": "沉静、私密、像周末早晨多睡了十分钟",
+      "color_palette": "暖奶白 / 浅杏色 / 原木棕 / 柔金色",
+      "transition": "cut",
+      "reference_type": "products"
+    },
+    {
+      "scene": 2,
+      "duration_sec": 5,
+      "shot_type": "medium",
+      "camera_angle": "low_angle",
+      "camera_movement": "track",
+      "scene_description": "脚穿拖鞋走过公寓的连续镜头：从卧室木地板过渡到浴室湿瓷砖。镜头低角度跟拍鞋底——45°倾斜的湿瓷砖面上鞋底纹路咬合不动，一镜到底无剪辑。镜头抬升，一个穿睡衣的背影走向开放式厨房。窗外城市天际线微亮。",
+      "dialogue_or_voiceover": "从浴室到厨房，每一步都踏实得像被托住。",
+      "mood": "从慵懒过渡到笃定，新的一天被温柔地接住",
+      "color_palette": "白 / 浅灰 / 橡木色 / 晨光青蓝背光",
+      "transition": "dissolve",
+      "reference_type": "scenes"
+    },
+    {
+      "scene": 3,
+      "duration_sec": 5,
+      "shot_type": "closeup",
+      "camera_angle": "eye_level",
+      "camera_movement": "fixed",
+      "scene_description": "咖啡机萃取完成，一只手端起咖啡杯。镜头落在吧台下的脚——拖鞋静放，一只脚翘起晃了晃，鞋底可见EVA环保标识压纹。旁边洗衣机门开着，刚洗过的同款拖鞋（另一色）拿出甩干，不褪色不塌形。镜头并置两双：三月前的那双和洗过的新鞋，肉眼难辨。字幕「可机洗，不下线」。",
+      "dialogue_or_voiceover": "",
+      "mood": "居家质感、投币洗衣房的干净感、物品被善待的体面",
+      "color_palette": "白底 / 不锈钢 / 咖啡深棕 / 米白鞋体",
+      "transition": "cut",
+      "reference_type": "products"
+    },
+    {
+      "scene": 4,
+      "duration_sec": 5,
+      "shot_type": "wide",
+      "camera_angle": "eye_level",
+      "camera_movement": "dolly",
+      "scene_description": "从吧台缓缓后退到全景：人在木餐桌前坐下打开笔记本，脚在桌下换了个舒服的姿势。日光已经满室，绿植在白墙前投下影子。拖鞋安静地踩在地板上，像两只驯良的小动物。做旧木桌上的待办便签和忙碌信号都不重要——脚是软的，就赢了。",
+      "dialogue_or_voiceover": "",
+      "mood": "现代都市人的小型乌托邦——繁忙之前的宁静",
+      "color_palette": "白墙 / 柚木色桌面 / 尤加利绿 / 奶油白",
+      "transition": "dissolve",
+      "reference_type": "scenes"
+    },
+    {
+      "scene": 5,
+      "duration_sec": 5,
+      "shot_type": "close-up",
+      "camera_angle": "eye_level",
+      "camera_movement": "fixed",
+      "scene_description": "傍晚，木飘窗台。拖鞋静静置于飘窗垫左侧，右侧一杯冒热气的咖啡和一本翻开的书。窗外天色转蓝调magic hour，室内亮着一盏暖光落地灯。织物纹理、书脊咖啡渍——都不重要。画面停留在拖鞋的质感上三十秒，EVA体感还原记忆，像一朵不会散的云。",
+      "dialogue_or_voiceover": "给双脚放个云假——愿你今天第一脚，也是踩软的。",
+      "mood": "安定、完成了一切的松弛，今天可以不用再努力",
+      "color_palette": "暮蓝 / 奶油白 / 暖灯琥珀 / 装订芥黄",
+      "transition": "fade",
+      "reference_type": "products"
+    },
+    {
+      "scene": 6,
+      "duration_sec": 5,
+      "shot_type": "extreme_closeup",
+      "camera_angle": "high_angle",
+      "camera_movement": "fixed",
+      "scene_description": "片尾卡片：画面淡出至奶白底色，中央一双拖鞋剪影般的扁平设计，下方一行细光衬线小黑字——「愿你今天第一脚，也是踩软的。」无价格，无二维码，无人脸，无按钮。一个微小的停顿后，静音全白屏。",
+      "dialogue_or_voiceover": "",
+      "visual_mellow": "极简、留白、不说服，只祝福",
+      "color_palette": "奶白 / 极浅灰 / 哑黑字",
+      "transition": "fade",
+      "reference_type": "none"
+    }
+  ]
+}

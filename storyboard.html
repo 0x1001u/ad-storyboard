@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>广告故事板生成器</title>
+<style>
+:root {
+  --bg: #0b0b12;
+  --card: #16161f;
+  --border: #252535;
+  --text: #e0e0f0;
+  --dim: #7a7a94;
+  --accent: #7c3aed;
+  --accent-hover: #8b5cf6;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+.container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
+
+/* Header */
+.header {
+  text-align: center; margin-bottom: 1.5rem; padding: 1.5rem 0 0.5rem;
+}
+.header h1 {
+  font-size: 2rem; font-weight: 700;
+  background: linear-gradient(135deg, #a78bfa, #7c3aed, #6366f1);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.header .subtitle { color: var(--dim); font-size: 0.85rem; margin-top: 0.3rem; }
+
+/* Layout */
+.row { display: flex; gap: 1.5rem; align-items: flex-start; }
+.col-side { width: 380px; flex-shrink: 0; position: sticky; top: 1rem; }
+.col-main { flex: 1; min-width: 0; }
+
+/* Card */
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.25rem; margin-bottom: 1rem;
+}
+.card-title {
+  font-size: 0.9rem; font-weight: 600; margin-bottom: 0.8rem;
+  color: #c4b5fd; display: flex; align-items: center; gap: 0.5rem;
+}
+.card-title .badge {
+  font-size: 0.65rem; background: rgba(124,58,237,0.2); color: #a78bfa;
+  border-radius: 99px; padding: 0.1rem 0.5rem; font-weight: 500;
+}
+
+/* Form */
+label { display: block; font-size: 0.78rem; color: var(--dim); margin-bottom: 0.25rem; margin-top: 0.7rem; font-weight: 500; }
+label:first-of-type { margin-top: 0; }
+input, textarea, select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.6rem 0.85rem; color: var(--text); font-size: 0.85rem; outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+select { cursor: pointer; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.65rem 1.3rem; border-radius: 10px; border: none;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); }
+.btn-full { width: 100%; justify-content: center; margin-top: 0.8rem; }
+
+/* Upload */
+.upload-area {
+  border: 2px dashed var(--border); border-radius: 10px; padding: 1rem;
+  text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 0.6rem;
+}
+.upload-area:hover { border-color: var(--accent); background: rgba(124,58,237,0.05); }
+.upload-area.dragover { border-color: var(--accent); background: rgba(124,58,237,0.1); }
+.upload-icon { font-size: 1.2rem; }
+.upload-text { color: var(--dim); font-size: 0.75rem; }
+.gallery-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.4rem; }
+.gallery-tab {
+  padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.7rem;
+  background: var(--bg); border: 1px solid var(--border); color: var(--dim); cursor: pointer;
+}
+.gallery-tab.active { border-color: var(--accent); color: #c4b5fd; background: rgba(124,58,237,0.1); }
+.gallery-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.gallery-item {
+  width: 64px; height: 64px; border-radius: 6px; overflow: hidden;
+  border: 2px solid var(--border); position: relative; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.gallery-item:hover { border-color: var(--accent); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-item .del {
+  position: absolute; top: 1px; right: 1px; width: 16px; height: 16px;
+  background: rgba(239,68,68,0.85); color: #fff; border-radius: 50%;
+  font-size: 9px; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s;
+}
+.gallery-item:hover .del { opacity: 1; }
+
+/* Progress */
+.progress-section {
+  text-align: center; padding: 2rem;
+}
+.progress-spinner {
+  width: 48px; height: 48px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 1rem;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.progress-step { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
+.progress-msg { font-size: 0.8rem; color: var(--dim); }
+.progress-bar { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; margin: 1rem 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--success)); border-radius: 99px; transition: width 0.5s ease; width: 0%; }
+
+/* Result tabs */
+.result-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.8rem; }
+.result-tab {
+  padding: 0.35rem 0.85rem; border-radius: 8px; font-size: 0.78rem;
+  background: var(--bg); border: 1px solid var(--border); color: var(--dim); cursor: pointer;
+}
+.result-tab.active { border-color: var(--accent); color: #c4b5fd; background: rgba(124,58,237,0.1); }
+.result-panel { display: none; }
+.result-panel.active { display: block; }
+
+/* Storyboard grid */
+.storyboard-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.8rem;
+}
+.frame-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; transition: border-color 0.15s;
+}
+.frame-card:hover { border-color: var(--accent); }
+.frame-card img {
+  width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block;
+  background: #0a0a0f; cursor: pointer;
+}
+.frame-info { padding: 0.7rem; }
+.frame-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem; }
+.frame-scene { font-size: 0.7rem; color: var(--accent); font-weight: 600; }
+.frame-time { font-size: 0.65rem; color: var(--dim); }
+.regenerate-btn {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  color: var(--dim); cursor: pointer; font-size: 0.75rem; padding: 0.15rem 0.4rem;
+  margin-left: auto; transition: all 0.15s; line-height: 1;
+}
+.regenerate-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,58,237,0.08); }
+.regenerate-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.frame-desc { font-size: 0.78rem; line-height: 1.5; }
+.frame-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.4rem; }
+.tag {
+  font-size: 0.6rem; padding: 0.1rem 0.4rem; border-radius: 4px;
+  background: rgba(124,58,237,0.12); color: #a78bfa;
+}
+.tag.camera { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+.tag.mood { background: rgba(245,158,11,0.12); color: #fcd34d; }
+.tag.transition { background: rgba(99,102,241,0.12); color: #a5b4fc; }
+
+/* Analysis */
+.analysis-block { line-height: 1.7; font-size: 0.85rem; }
+.analysis-block h3 { color: #c4b5fd; font-size: 0.9rem; margin: 1rem 0 0.4rem; }
+.analysis-block .sab-item { padding: 0.5rem 0.7rem; border-radius: 8px; margin-bottom: 0.4rem; font-size: 0.82rem; }
+.analysis-block .sab-s { background: rgba(124,58,237,0.08); border-left: 3px solid var(--accent); }
+.analysis-block .sab-a { background: rgba(16,185,129,0.08); border-left: 3px solid var(--success); }
+.analysis-block .sab-b { background: rgba(245,158,11,0.08); border-left: 3px solid var(--warning); }
+.analysis-block .sab-label { font-weight: 600; font-size: 0.75rem; }
+
+/* Error */
+.error-box {
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 10px; padding: 1rem; color: #fca5a5; font-size: 0.85rem; margin: 1rem 0;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.5rem; max-width: 900px; max-height: 90vh; width: 92%; overflow: auto;
+}
+.modal img { width: 100%; border-radius: 8px; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 3rem 2rem; color: var(--dim); }
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+
+/* Responsive */
+@media (max-width: 860px) {
+  .row { flex-direction: column; }
+  .col-side { width: 100%; position: static; }
+  .storyboard-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🎬 广告故事板</h1>
+    <div class="subtitle">输入产品 → TVC 叙事模型 → 品牌世界构建 → 电影级分镜</div>
+  </div>
+
+  <div class="row">
+    <!-- Left: Input -->
+    <div class="col-side">
+      <div class="card">
+        <div class="card-title">📋 产品信息</div>
+
+        <label>产品名称</label>
+        <input type="text" id="productName" placeholder="如：云朵拖鞋">
+
+        <label>产品描述</label>
+        <textarea id="productDesc" rows="2" placeholder="核心卖点、使用场景…"></textarea>
+
+        <label>目标受众</label>
+        <input type="text" id="audience" placeholder="如：25-35岁都市白领">
+
+        <label>TVC 叙事模型</label>
+        <select id="narrativeModel">
+          <option value="auto">🤖 自动推荐</option>
+          <option value="pain_solution">🩹 痛点-解决</option>
+          <option value="product_breakdown">🔧 产品电影化拆解</option>
+          <option value="brand_world">🌍 品牌世界穿梭</option>
+          <option value="lifestyle">🏃 生活方式短片</option>
+          <option value="emotional_anchor">💗 情感锚点</option>
+          <option value="montage_reveal">🎇 蒙太奇揭示</option>
+          <option value="before_after">⚖️ 前后对比</option>
+          <option value="brand_manifesto">📢 品牌宣言</option>
+        </select>
+
+        <label>视觉风格</label>
+        <select id="visualStyle">
+          <option value="photo">📷 真人实拍/摄影级</option>
+          <option value="movie_still">🎬 真人电影剧照</option>
+          <option value="game_cg">🎮 3A 游戏 CG</option>
+          <option value="engine_cg">💎 高精 CG 引擎级</option>
+          <option value="aesthetic">🎨 特定美学风格</option>
+        </select>
+
+        <label>品牌世界 / 场景（可选）</label>
+        <input type="text" id="brandWorld" placeholder="如：雪山、都市深夜、山野露营…">
+
+        <label style="display:flex;gap:0.5rem;align-items:center">
+          时长
+          <select id="duration" style="width:80px">
+            <option value="30">30s</option>
+            <option value="45">45s</option>
+            <option value="60">60s</option>
+          </select>
+        </label>
+
+        <label>竞品视频链接（可选）</label>
+        <input type="text" id="videoUrl" placeholder="YouTube/B站链接，分析后作为参考">
+
+        <label>Agnes API Key</label>
+        <input type="password" id="apiKey" placeholder="从 agnes-ai.com 获取">
+
+        <button class="btn btn-primary btn-full" id="genBtn" onclick="analyze()">📝 分析产品</button>
+        <button class="btn btn-secondary btn-full" id="promptsBtn" style="display:none" onclick="generatePrompts()">🎬 生成分镜提示词</button>
+        <p style="font-size:0.72rem;color:var(--dim);margin-top:0.5rem;text-align:center">先分析出创作方案 → 确认后生成分镜提示词 → 再生成图片</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🖼️ 参考图库 <span class="badge">上传图片用于多图参考</span></div>
+        <div class="gallery-tabs">
+          <div class="gallery-tab active" onclick="switchGallery('models',this)">👤 模特</div>
+          <div class="gallery-tab" onclick="switchGallery('products',this)">📦 产品</div>
+          <div class="gallery-tab" onclick="switchGallery('scenes',this)">🏞️ 场景</div>
+        </div>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">点击上传参考图</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="uploadFiles(event)">
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="col-main">
+      <!-- Progress -->
+      <div id="progressSection" class="card" style="display:none">
+        <div class="progress-section">
+          <div class="progress-spinner"></div>
+          <div class="progress-step" id="progressStep">🔍 搜索竞品</div>
+          <div class="progress-msg" id="progressMsg">正在搜索同类广告信息…</div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="resultSection" style="display:none">
+        <div class="result-tabs">
+          <div class="result-tab active" onclick="switchTab('storyboard',this)">🎬 分镜图</div>
+          <div class="result-tab" onclick="switchTab('analysis',this)">📊 分析报告</div>
+          <button class="btn btn-primary" id="genImagesBtn" style="margin-left:auto;display:none" onclick="generateAllImages()">🖼️ 生成所有图片</button>
+        </div>
+
+        <div id="panel-storyboard" class="result-panel active">
+          <div class="storyboard-grid" id="storyboardGrid"></div>
+        </div>
+
+        <div id="panel-analysis" class="result-panel">
+          <div class="card"><div class="analysis-block" id="analysisBlock"></div></div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState">
+        <div class="card">
+          <div class="empty-state">
+            <div class="icon">🎯</div>
+            <p>输入产品信息，上传参考图，点击生成</p>
+            <p style="font-size:0.8rem;color:var(--dim);margin-top:0.5rem">
+              AI 分析竞品 → SAB 分级 → 生成带分镜图的完整故事板
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div id="errorSection" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal-overlay" style="display:none" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <img id="modalImage" src="" alt="">
+    <div id="modalInfo" style="margin-top:0.8rem;font-size:0.85rem;color:var(--dim);"></div>
+  </div>
+</div>
+
+<script>
+// ── Gallery ──
+let currentGallery = 'models';
+
+async function loadGallery() {
+  const r = await fetch(`/api/gallery?category=${currentGallery}`);
+  const data = await r.json();
+  const grid = document.getElementById('galleryGrid');
+  grid.innerHTML = data.images.length
+    ? data.images.map(img => `
+      <div class="gallery-item" onclick="viewImage('${img.path}')">
+        <img src="${img.path}" loading="lazy">
+        <div class="del" onclick="event.stopPropagation();deleteImage('${img.category}','${img.filename}')">✕</div>
+      </div>`).join('')
+    : '<div style="color:var(--dim);font-size:0.7rem;width:100%;text-align:center;padding:0.5rem">暂无图片</div>';
+}
+
+function switchGallery(cat, el) {
+  currentGallery = cat;
+  document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadGallery();
+}
+
+async function uploadFiles(e) {
+  for (const f of e.target.files) {
+    const fd = new FormData();
+    fd.append('category', currentGallery);
+    fd.append('file', f);
+    await fetch('/api/upload', { method: 'POST', body: fd });
+  }
+  e.target.value = '';
+  loadGallery();
+}
+
+async function deleteImage(cat, fn) {
+  if (!confirm('删除？')) return;
+  await fetch(`/api/gallery/${cat}/${fn}`, { method: 'DELETE' });
+  loadGallery();
+}
+
+function viewImage(path) {
+  document.getElementById('modalImage').src = path;
+  document.getElementById('modalInfo').textContent = path;
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+
+// Drag & drop
+const ua = document.getElementById('uploadArea');
+ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('dragover'); });
+ua.addEventListener('dragleave', () => ua.classList.remove('dragover'));
+ua.addEventListener('drop', e => {
+  e.preventDefault(); ua.classList.remove('dragover');
+  const files = e.dataTransfer.files;
+  if (files.length) {
+    const input = document.getElementById('fileInput');
+    const dt = new DataTransfer();
+    for (const f of files) dt.items.add(f);
+    input.files = dt.files;
+    uploadFiles({ target: input });
+  }
+});
+
+// ── Tabs ──
+let lastFrames = [];
+let lastData = {};
+let briefId = '';
+function switchTab(tab, el) {
+  document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.result-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+}
+
+// ── Generate ──
+async function analyze() {
+  const pn = document.getElementById('productName').value.trim();
+  const pd = document.getElementById('productDesc').value.trim();
+  const au = document.getElementById('audience').value.trim();
+  const du = parseInt(document.getElementById('duration').value);
+  const nm = document.getElementById('narrativeModel').value;
+  const vs = document.getElementById('visualStyle').value;
+  const bw = document.getElementById('brandWorld').value.trim();
+  const vu = document.getElementById('videoUrl').value.trim();
+  if (!pn || !pd) { alert('请填写产品名称和描述'); return; }
+
+  const steps = [
+    ['🔍 搜索竞品', '搜索同类广告信息…'],
+    ['👁️ 视觉分析', '分析参考图…'],
+    ['🤖 创作方案', 'AI 生成创意简报…'],
+    ['✅ 分析完成', '请查看报告，确认后生成分镜'],
+  ];
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('errorSection').style.display = 'none';
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('genBtn').disabled = true;
+  document.getElementById('promptsBtn').style.display = 'none';
+
+  const fill = document.getElementById('progressFill');
+  const stepEl = document.getElementById('progressStep');
+  const msgEl = document.getElementById('progressMsg');
+
+  function updateProgress(idx, pct) {
+    const s = steps[idx] || steps[steps.length-1];
+    stepEl.textContent = s[0];
+    msgEl.textContent = s[1];
+    fill.style.width = pct + '%';
+  }
+
+  updateProgress(0, 10);
+  document.getElementById('genImagesBtn').style.display = 'none';
+
+  // If video URL provided, start async video analysis
+  let videoAnalysis = '';
+  if (vu) {
+    updateProgress(0, 15);
+    stepEl.textContent = '📹 分析视频';
+    msgEl.textContent = '正在启动视频分析…';
+    try {
+      const fd2 = new FormData();
+      fd2.append('video_url', vu);
+      const r = await fetch('/api/analyze_video', { method: 'POST', body: fd2 });
+      const task = await r.json();
+      const taskId = task.task_id;
+      while (true) {
+        await new Promise(r => setTimeout(r, 5000));
+        const pr = await fetch(`/api/analyze_video/${taskId}`);
+        const st = await pr.json();
+        msgEl.textContent = `视频分析中 ${st.progress}%…`;
+        if (st.status === 'done') { videoAnalysis = st.result; break; }
+        if (st.status === 'error') { break; }
+      }
+    } catch (e) {
+      console.warn('Video analysis failed:', e);
+    }
+  }
+
+  updateProgress(1, 40);
+
+  const fd = new FormData();
+  fd.append('product_name', pn);
+  fd.append('product_description', pd);
+  fd.append('audience', au);
+  fd.append('duration', du);
+  fd.append('narrative_model', nm);
+  fd.append('visual_style', vs);
+  fd.append('brand_world', bw);
+  fd.append('video_analysis', videoAnalysis);
+
+  try {
+    const resp = await fetch('/api/analyze', { method: 'POST', body: fd });
+    const data = await resp.json();
+    if (data.error) {
+      showError(typeof data.error === 'string' ? data.error : JSON.stringify(data.error,null,2));
+      return;
+    }
+    briefId = data.brief_id || '';
+    lastData = data;
+    renderAnalysis(data);
+    document.getElementById('resultSection').style.display = 'block';
+    document.getElementById('promptsBtn').style.display = 'block';
+    document.getElementById('genBtn').textContent = '📝 重新分析';
+
+    updateProgress(3, 100);
+    stepEl.textContent = '✅ 分析完成';
+    msgEl.textContent = '请查看报告，确认后点击"生成分镜提示词"';
+    setTimeout(() => { document.getElementById('progressSection').style.display = 'none'; }, 2000);
+  } catch (e) {
+    showError('请求失败: ' + e.message);
+  } finally {
+    document.getElementById('genBtn').disabled = false;
+  }
+}
+
+async function generatePrompts() {
+  if (!briefId) { alert('请先分析产品'); return; }
+  const du = parseInt(document.getElementById('duration').value);
+  const vs = document.getElementById('visualStyle').value;
+  const bw = document.getElementById('brandWorld').value.trim();
+
+  document.getElementById('errorSection').style.display = 'none';
+  document.getElementById('genImagesBtn').style.display = 'none';
+  document.getElementById('promptsBtn').disabled = true;
+  document.getElementById('promptsBtn').textContent = '⏳ 生成中…';
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('progressStep').textContent = '🎨 生成分镜提示词';
+  document.getElementById('progressMsg').textContent = 'AI 正在创作分镜脚本…';
+  document.getElementById('progressFill').style.width = '30%';
+
+  const fd = new FormData();
+  fd.append('brief_id', briefId);
+  fd.append('duration', du);
+  fd.append('visual_style', vs);
+  fd.append('brand_world', bw);
+
+  try {
+    const resp = await fetch('/api/generate', { method: 'POST', body: fd });
+    const data = await resp.json();
+    if (data.error) {
+      showError(typeof data.error === 'string' ? data.error : JSON.stringify(data.error,null,2));
+      return;
+    }
+    const frames = data.frames || [];
+    if (!frames.length) { showError('未生成分镜帧'); return; }
+    lastData = data;
+    renderStoryboard(frames);
+    renderAnalysis(data);
+    document.getElementById('genImagesBtn').style.display = 'inline-flex';
+
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressStep').textContent = '✅ 分镜完成';
+    document.getElementById('progressMsg').textContent = `共 ${frames.length} 个分镜镜头`;
+    setTimeout(() => { document.getElementById('progressSection').style.display = 'none'; }, 2000);
+  } catch (e) {
+    showError('请求失败: ' + e.message);
+  } finally {
+    document.getElementById('promptsBtn').disabled = false;
+    document.getElementById('promptsBtn').textContent = '🎬 生成分镜提示词';
+  }
+}
+
+function showError(msg) {
+  document.getElementById('progressSection').style.display = 'none';
+  const el = document.getElementById('errorSection');
+  el.style.display = 'block';
+  el.innerHTML = `<div class="error-box">❌ ${msg.replace(/\n/g,'<br>')}</div>`;
+}
+
+function renderStoryboard(frames) {
+  lastFrames = frames;
+  const grid = document.getElementById('storyboardGrid');
+  grid.innerHTML = frames.map((f, i) => {
+    const hasImg = f.image_url && !f.error;
+    const imgHtml = hasImg
+      ? `<img src="${f.image_url}" alt="Scene ${f.scene}" loading="lazy" onclick="viewImage('${f.image_url}')">`
+      : `<div style="aspect-ratio:16/9;background:#0a0a0f;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:0.75rem">${f.error || '🖼️ 待生成图片'}</div>`;
+    const tags = [];
+    if (f.shot_type) tags.push(`<span class="tag">${f.shot_type}</span>`);
+    if (f.camera_angle) tags.push(`<span class="tag camera">${f.camera_angle}</span>`);
+    if (f.camera_movement && f.camera_movement !== 'fixed') tags.push(`<span class="tag camera">${f.camera_movement}</span>`);
+    if (f.lighting) tags.push(`<span class="tag mood">💡${f.lighting}</span>`);
+    if (f.mood) tags.push(`<span class="tag mood">${f.mood}</span>`);
+    if (f.transition && f.transition !== 'cut') tags.push(`<span class="tag transition">↳ ${f.transition}</span>`);
+    return `
+      <div class="frame-card">
+        ${imgHtml}
+        <div class="frame-info">
+          <div class="frame-header">
+            <span class="frame-scene">#${f.scene || i+1}</span>
+            <span class="frame-time">${f.duration_sec || '?'}s</span>
+            <button class="regenerate-btn" onclick="regenerateFrame(${i})" title="重新生成此图">🔄</button>
+          </div>
+          <div class="frame-desc">${esc(f.scene_description || '')}</div>
+          ${tags.length ? `<div class="frame-tags">${tags.join('')}</div>` : ''}
+          ${f.dialogue_or_voiceover ? `<div style="font-size:0.72rem;color:var(--warning);margin-top:0.3rem;font-style:italic">🎤 ${esc(f.dialogue_or_voiceover)}</div>` : ''}
+          ${f.motion_notes ? `<div style="font-size:0.72rem;color:var(--dim);margin-top:0.3rem;border-top:1px dashed var(--border);padding-top:0.3rem"><span style="color:#a5b4fc">🎞 动态/视频</span> ${esc(f.motion_notes)}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderAnalysis(data) {
+  const block = document.getElementById('analysisBlock');
+  const sab = data.sab_grading || {};
+  const ref = data.ref_analysis || {};
+  let html = '';
+
+  // Visual analysis (products & scenes) — shown before narrative model
+  if (ref.products) {
+    html += `<h3>📦 产品视觉分析</h3><div class="sab-item sab-s"><p>${esc(ref.products)}</p></div>`;
+  }
+  if (ref.scenes && ref.scenes.length) {
+    html += `<h3>🏞️ 场景视觉分析</h3>`;
+    ref.scenes.forEach((s, i) => {
+      html += `<div class="sab-item sab-a" style="margin-bottom:0.3rem"><strong>场景 ${i+1}</strong><br>${esc(s)}</div>`;
+    });
+  }
+
+  if (data.narrative_model) {
+    const icons = {pain_solution:'🩹',product_breakdown:'🔧',brand_world:'🌍',lifestyle:'🏃',emotional_anchor:'💗',montage_reveal:'🎇',before_after:'⚖️',brand_manifesto:'📢'};
+    const icon = icons[data.narrative_model] || '🎬';
+    html += `<h3>${icon} TVC 叙事模型</h3><p><strong>${data.narrative_model}</strong>${data.narrative_model_desc ? ' — '+esc(data.narrative_model_desc) : ''}</p>`;
+  }
+  if (data.competitor_analysis) {
+    html += `<h3>🔍 竞品分析</h3><p>${esc(data.competitor_analysis)}</p>`;
+  }
+  if (data.video_analysis) {
+    html += `<h3>📹 视频分析</h3><p>${esc(data.video_analysis)}</p>`;
+  }
+  html += '<h3>📊 SAB 卖点分级</h3>';
+  if (sab.s) html += `<div class="sab-item sab-s"><div class="sab-label">🟣 S · 差异化核心</div>${esc(sab.s)}</div>`;
+  if (sab.a) html += `<div class="sab-item sab-a"><div class="sab-label">🟢 A · 信任背书</div>${esc(sab.a)}</div>`;
+  if (sab.b) html += `<div class="sab-item sab-b"><div class="sab-label">🟡 B · 价值共鸣</div>${esc(sab.b)}</div>`;
+  if (data.overall_style_guide) {
+    html += `<h3>🎨 视觉风格指南</h3><p>${esc(data.overall_style_guide)}</p>`;
+  }
+  block.innerHTML = html || '<p style="color:var(--dim)">无分析数据</p>';
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function generateAllImages() {
+  const btn = document.getElementById('genImagesBtn');
+  if (!lastData.frames || !lastData.frames.length) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ 生成中…';
+  const ak = document.getElementById('apiKey').value.trim();
+  const vs = document.getElementById('visualStyle').value;
+  if (!ak) { alert('请填写 Agnes API Key'); btn.disabled = false; btn.textContent = '🖼️ 生成所有图片'; return; }
+  try {
+    const r = await fetch('/api/generate_images', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ frames: lastData.frames, api_key: ak, visual_style: vs }),
+    });
+    const data = await r.json();
+    if (data.error) { alert('生成失败: ' + data.error); btn.disabled = false; btn.textContent = '🖼️ 生成所有图片'; return; }
+    lastData.frames = data.frames;
+    renderStoryboard(data.frames);
+    btn.textContent = '✅ 已生成';
+    btn.style.display = 'none';
+  } catch (e) {
+    alert('请求失败: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = '🖼️ 生成所有图片';
+  }
+}
+
+async function regenerateFrame(idx) {
+  const f = lastFrames[idx];
+  if (!f) return;
+  const btn = document.querySelectorAll('.regenerate-btn')[idx];
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  const ak = document.getElementById('apiKey').value.trim();
+  const vs = document.getElementById('visualStyle').value;
+  try {
+    const r = await fetch('/api/regenerate', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        scene_description: f.scene_description,
+        shot_type: f.shot_type,
+        camera_angle: f.camera_angle,
+        lighting: f.lighting,
+        visual_style: vs,
+        reference_type: f.reference_type,
+        api_key: ak,
+      }),
+    });
+    const data = await r.json();
+    if (data.error) { alert('重新生成失败: ' + data.error); btn.textContent = '🔄'; btn.disabled = false; return; }
+    f.image_url = data.image_url;
+    f.error = '';
+    if (lastData.frames && lastData.frames[idx]) lastData.frames[idx].image_url = data.image_url;
+    renderStoryboard(lastFrames);
+  } catch (e) {
+    alert('请求失败: ' + e.message);
+    btn.textContent = '🔄';
+    btn.disabled = false;
+  }
+}
+
+// Init
+loadGallery();
+</script>
+</body>
+</html>
