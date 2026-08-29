@@ -41,7 +41,7 @@ LLM_BASE = "http://localhost:20128/v1"
 LLM_KEY = "sk-990...646a"
 LLM_MODEL = "oc/deepseek-v4-flash-free"
 VISION_BASE = "https://api-inference.modelscope.cn/v1"
-VISION_KEY = "ms-017f687c-6168-4f7f-a0c1-6ea6ddd45f1c"
+VISION_KEY = "ms-017...45f1c"
 VISION_MODEL = "Qwen/Qwen3-VL-8B-Instruct"
 
 # ── Agnes API ──
